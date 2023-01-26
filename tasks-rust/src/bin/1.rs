@@ -12,8 +12,8 @@ fn main() {
         return;
     }
 
-    let start = args[1].parse::<u32>().unwrap();
-    let stop = args[2].parse::<u32>().unwrap();
+    let start = args[1].parse::<u32>().expect("Could not be parsed to u32");
+    let stop = args[2].parse::<u32>().expect("Could not be parsed to u32");
     let number_of_threads = args[3].parse::<u32>().unwrap();
 
     let primes: Arc<Mutex<Vec<u32>>> = Arc::new(Mutex::new(Vec::new()));
