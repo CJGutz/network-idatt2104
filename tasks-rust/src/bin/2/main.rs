@@ -1,15 +1,16 @@
 use workers::Workers;
 
-pub mod workers;
+mod workers;
 
 fn main() {
     let mut workers = Workers::new(2);
     workers.start();
-    
-    workers.post_timeout(|| {
-        println!("Hello from the thread");
-    }, 5000);
-    
+
+    workers.post(|| {
+        println!("Hello 1 from the thread");
+    });
+
     workers.join();
+
 
 }
