@@ -8,7 +8,7 @@ pub struct Workers {
     number_of_workers: u32,
     tasks: Arc<Mutex<Vec<fn()>>>,
     threads: Vec<thread::JoinHandle<()>>,
-    stopping: bool,
+    condvar: Arc<(Mutex<bool>, Condvar)>,
 }
 
 impl Workers {
@@ -17,6 +17,11 @@ impl Workers {
             .lock()
             .expect("Could not lock task mutex")
             .push(func);
+
+        let (lock, condvar) = &*self.condvar;
+        let mut task_created = lock.lock().expect("Could not lock condvar mutex");
+        *task_created = true;
+        condvar.notify_one();
     }
 
     pub fn join(self) {
@@ -31,13 +36,16 @@ impl Workers {
             number_of_workers: workers,
             tasks: Arc::new(Mutex::new(Vec::new())),
             threads: Vec::new(),
-            stopping: false,
+            condvar: Arc::new((Mutex::new(false), Condvar::new())),
         };
     }
 
     // Threads will wait for a task to run
     pub fn start(&mut self) {
         for _ in 0..self.number_of_workers {
+            let (lock, condvar) = &*self.condvar;
+            let mut task_created = lock.clone().lock().expect("Could not lock condvar mutex");
+
             let tasks = self.tasks.clone();
             self.threads.push(thread::spawn(move || loop {
                 let task = tasks
