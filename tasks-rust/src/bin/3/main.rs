@@ -1,44 +1,25 @@
-use std::{
-    io::Read,
-    net::{Shutdown, TcpListener},
-    thread,
-    time::Duration,
-};
+use std::io::stdin;
+use server::create_server;
 
-const ADDRESS: &str = "127.0.0.1:8080";
-const NUMBER_OF_THREADS: u32 = 4;
+mod server;
 
 fn main() {
-    let listener = TcpListener::bind(ADDRESS).expect("Could not bind to address");
+    println!("Select service: [Server, Client]");
+    let server_alias: Vec<&str> = vec![&"server", &"s"];
+    let client_alias: Vec<&str> = vec![&"client", &"c"];
 
-    for _ in 0..NUMBER_OF_THREADS {
-        let listener = listener.try_clone().expect("Could not clone listener");
-        thread::spawn(move || {
-            start_listener(listener);
-        });
-    }
+    let buffer = &mut String::new();
+    stdin().read_line(buffer).expect("Recieved no input");
+    let buffer = buffer.trim().to_lowercase();
+    let buffer = &mut buffer.as_str();
 
-    thread::sleep(Duration::from_secs(100));
-}
-
-fn start_listener(listener: TcpListener) {
-    for stream in listener.incoming() {
-        if stream.is_err() {
-            println!(
-                "Could not connect to client request, {}",
-                stream.unwrap_err()
-            );
-            continue;
-        }
-        let mut stream = stream.unwrap();
-        println!("Connected to client");
-        let buf = &mut String::new();
-        println!(
-            "Message: {}",
-            stream.read_to_string(buf).expect("No message recieved")
-        );
-        if stream.shutdown(Shutdown::Both).is_ok() {
-            println!("Tcp stream shutdown");
-        }
+    if server_alias.contains(buffer) {
+        println!("Starting server");
+        create_server();
+    } else if client_alias.contains(buffer) {
+        println!("Starting client");
+        // create_client();
+    } else {
+        println!("Invalid input");
     }
 }
