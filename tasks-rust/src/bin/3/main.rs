@@ -1,7 +1,10 @@
-use std::io::stdin;
+use client::create_client;
 use server::create_server;
+use std::io::stdin;
 
 mod server;
+mod client;
+mod defer;
 
 fn main() {
     println!("Select service: [Server, Client]");
@@ -18,7 +21,7 @@ fn main() {
         create_server();
     } else if client_alias.contains(buffer) {
         println!("Starting client");
-        // create_client();
+        create_client();
     } else {
         println!("Invalid input");
     }

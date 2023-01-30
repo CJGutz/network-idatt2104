@@ -5,12 +5,15 @@ use std::{
     time::Duration,
 };
 
-const ADDRESS: &str = "127.0.0.1:8080";
+use crate::defer::defer;
+
+pub const ADDRESS: &str = "127.0.0.1:8080";
 const NUMBER_OF_THREADS: u32 = 4;
 const READ_TIMEOUT_S: u64 = 30;
 
 pub fn create_server() {
     let listener = TcpListener::bind(ADDRESS).expect("Could not bind to address");
+    println!("Server listening on {}", ADDRESS);
 
     for _ in 0..NUMBER_OF_THREADS {
         let listener = listener.try_clone().expect("Could not clone listener");
@@ -35,6 +38,14 @@ fn start_listener(listener: TcpListener) {
         let buf = &mut String::new();
         let mut stream = stream.unwrap();
 
+        defer(|| {
+            if stream.shutdown(Shutdown::Both).is_ok() {
+                println!("Tcp stream shutdown");
+            } else {
+                println!("Could not shutdown tcp stream");
+            }
+        });
+
         stream
             .set_read_timeout(Some(Duration::from_secs(READ_TIMEOUT_S)))
             .expect("Could not set read timeout");
@@ -44,11 +55,6 @@ fn start_listener(listener: TcpListener) {
                 std::io::ErrorKind::TimedOut => println!("Read timed out"),
                 _ => println!("Could not read from stream, {}", e),
             },
-        }
-        if stream.shutdown(Shutdown::Both).is_ok() {
-            println!("Tcp stream shutdown");
-        } else {
-            println!("Could not shutdown tcp stream");
         }
     }
 }
