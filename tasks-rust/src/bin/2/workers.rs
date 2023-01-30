@@ -49,7 +49,9 @@ impl Workers {
             let tasks = self.tasks.clone();
             let convar_c = (&self.condvar).clone();
             self.threads.push(thread::spawn(move || {
-                while *active.lock().expect("Could not lock active mutex") {
+                while *active.lock().expect("Could not lock active mutex")
+                    || tasks.lock().expect("Could not lock tasks").is_empty()
+                {
                     // Wait for a task to be posted
                     let (lock, condvar) = &*convar_c;
                     {
@@ -57,7 +59,7 @@ impl Workers {
                             lock.lock().expect("Could not lock mutex for condvar");
                         while !*task_present {
                             task_present =
-                                condvar.wait(task_present).expect("Failed to wait for task")
+                                condvar.wait(task_present).expect("Failed to wait for task");
                         }
                     }
 
@@ -86,7 +88,7 @@ impl Workers {
         });
     }
 
-    pub fn stop(self) {
+    pub fn stop(&self) {
         *self.active.lock().expect("Could not lock active mutex") = false;
 
         let (lock, condvar) = &*self.condvar;
