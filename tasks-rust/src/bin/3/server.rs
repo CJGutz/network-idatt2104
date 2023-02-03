@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use crate::{defer::defer, ADDRESS, READ_TIMEOUT_S};
+use crate::{ADDRESS, READ_TIMEOUT_S};
 
 const NUMBER_OF_THREADS: u32 = 4;
 
@@ -45,8 +45,8 @@ fn start_listener(listener: TcpListener) {
             println!("Message: {}", read_buf);
             let read_buf = read_buf.as_str();
             let calculation: Vec<&str> = read_buf.trim().split(" ").collect();
-            let first_num_result = calculation[0].parse::<u32>();
-            let second_num_result = calculation[2].parse::<u32>();
+            let first_num_result = calculation[0].parse::<i32>();
+            let second_num_result = calculation[2].parse::<i32>();
             if calculation.len() != 3
                 || first_num_result.is_err()
                 || second_num_result.is_err()
