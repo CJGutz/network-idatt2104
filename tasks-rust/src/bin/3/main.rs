@@ -6,6 +6,9 @@ mod server;
 mod client;
 mod defer;
 
+pub const ADDRESS: &str = "127.0.0.1:8080";
+pub const READ_TIMEOUT_S: u64 = 100;
+
 fn main() {
     println!("Select service: [Server, Client]");
     let server_alias: Vec<&str> = vec![&"server", &"s"];

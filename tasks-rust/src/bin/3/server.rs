@@ -1,15 +1,13 @@
 use std::{
-    io::Read,
+    io::{Read, Write},
     net::{Shutdown, TcpListener},
     thread,
     time::Duration,
 };
 
-use crate::defer::defer;
+use crate::{defer::defer, ADDRESS, READ_TIMEOUT_S};
 
-pub const ADDRESS: &str = "127.0.0.1:8080";
 const NUMBER_OF_THREADS: u32 = 4;
-const READ_TIMEOUT_S: u64 = 30;
 
 pub fn create_server() {
     let listener = TcpListener::bind(ADDRESS).expect("Could not bind to address");
@@ -34,27 +32,46 @@ fn start_listener(listener: TcpListener) {
             );
             continue;
         }
-        println!("Connected to client");
-        let buf = &mut String::new();
         let mut stream = stream.unwrap();
+        println!("Connected to client");
 
-        defer(|| {
-            if stream.shutdown(Shutdown::Both).is_ok() {
-                println!("Tcp stream shutdown");
-            } else {
-                println!("Could not shutdown tcp stream");
-            }
-        });
-
+        let read_buf = &mut String::new();
         stream
             .set_read_timeout(Some(Duration::from_secs(READ_TIMEOUT_S)))
             .expect("Could not set read timeout");
-        match stream.read_to_string(buf) {
-            Ok(_) => println!("Message: {}", buf),
-            Err(e) => match e.kind() {
-                std::io::ErrorKind::TimedOut => println!("Read timed out"),
-                _ => println!("Could not read from stream, {}", e),
-            },
+
+        let client_message = stream.read_to_string(read_buf);
+        if client_message.is_ok() {
+            println!("Message: {}", read_buf);
+            let read_buf = read_buf.as_str();
+            let calculation: Vec<&str> = read_buf.trim().split(" ").collect();
+            let first_num_result = calculation[0].parse::<u32>();
+            let second_num_result = calculation[2].parse::<u32>();
+            if calculation.len() != 3
+                || first_num_result.is_err()
+                || second_num_result.is_err()
+                || (calculation[1] != "-" && calculation[1] != "+")
+            {
+                println!("Invalid calculation");
+                continue;
+            }
+
+            let first_num = first_num_result.unwrap();
+            let second_num = second_num_result.unwrap();
+            if calculation[1] == "+" {
+                println!("{}", first_num + second_num);
+            } else if calculation[1] == "-" {
+                println!("{}", first_num - second_num);
+            }
+        } else {
+            println!(
+                "Could not read from client, {}",
+                client_message.unwrap_err()
+            );
         }
+
+        stream
+            .shutdown(Shutdown::Both)
+            .expect("Could not shutdown stream");
     }
 }
