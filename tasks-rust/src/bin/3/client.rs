@@ -27,20 +27,21 @@ fn send_to_server(message: String) {
         .set_write_timeout(Some(Duration::from_secs(READ_TIMEOUT_S)))
         .expect("Could not set read timout");
     stream
-        .write(message.as_bytes())
+        .write_all(message.as_bytes())
         .expect("Could not write to stream");
-
+    let response = get_from_server(&mut stream);
+    println!("Response: {}", response);
     stream
         .shutdown(Shutdown::Both)
         .expect("Could not shutdown tcp stream");
 }
 
-fn get_from_server(stream: &mut TcpStream) {
+fn get_from_server(stream: &mut TcpStream) -> String {
     let read_buffer = &mut String::new();
     stream
         .read_to_string(read_buffer)
         .expect("Could not read from stream");
-    println!("Message: {}", read_buffer);
+    return read_buffer.to_string();
 }
 
 fn get_user_calculation() -> String {

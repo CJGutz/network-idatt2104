@@ -55,14 +55,18 @@ fn start_listener(listener: TcpListener) {
                 println!("Invalid calculation");
                 continue;
             }
-
+            let result: i32;
             let first_num = first_num_result.unwrap();
             let second_num = second_num_result.unwrap();
             if calculation[1] == "+" {
-                println!("{}", first_num + second_num);
+                result = first_num + second_num;
             } else if calculation[1] == "-" {
-                println!("{}", first_num - second_num);
+                result = first_num - second_num;
+            } else {
+                println!("Invalid operator");
+                continue;
             }
+            stream.write_all(&(result.to_be_bytes())).expect("Could not write to stream");
         } else {
             println!(
                 "Could not read from client, {}",
