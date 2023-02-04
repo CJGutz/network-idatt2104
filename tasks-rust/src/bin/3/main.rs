@@ -7,7 +7,7 @@ mod client;
 mod defer;
 
 pub const ADDRESS: &str = "127.0.0.1:8080";
-pub const READ_TIMEOUT_S: u64 = 100;
+pub const READ_TIMEOUT_S: u64 = 1;
 
 fn main() {
     println!("Select service: [Server, Client]");

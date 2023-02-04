@@ -16,7 +16,7 @@ pub fn create_client() {
         let calculation = get_user_calculation();
         send_to_server(calculation);
 
-        println!("Do you want to continue? [Y/n]");
+        println!("Do you want to continue? [y/N]");
         should_continue = get_valid_input(Some(&vec!["y", "Y", "Yes"])).is_ok();
     }
 }
@@ -27,7 +27,7 @@ fn send_to_server(message: String) {
         .set_write_timeout(Some(Duration::from_secs(READ_TIMEOUT_S)))
         .expect("Could not set read timout");
     stream
-        .write_all(message.as_bytes())
+        .write(message.as_bytes())
         .expect("Could not write to stream");
     let response = get_from_server(&mut stream);
     println!("Response: {}", response);
@@ -37,11 +37,11 @@ fn send_to_server(message: String) {
 }
 
 fn get_from_server(stream: &mut TcpStream) -> String {
-    let read_buffer = &mut String::new();
+    let mut read_buffer = [32; 4];
     stream
-        .read_to_string(read_buffer)
+        .read(&mut read_buffer)
         .expect("Could not read from stream");
-    return read_buffer.to_string();
+    return i32::from_be_bytes(read_buffer).to_string();
 }
 
 fn get_user_calculation() -> String {
