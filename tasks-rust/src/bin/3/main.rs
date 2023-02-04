@@ -2,9 +2,8 @@ use client::create_client;
 use server::create_server;
 use std::io::stdin;
 
-mod server;
 mod client;
-mod defer;
+mod server;
 
 pub const ADDRESS: &str = "127.0.0.1:8080";
 pub const READ_TIMEOUT_S: u64 = 1;

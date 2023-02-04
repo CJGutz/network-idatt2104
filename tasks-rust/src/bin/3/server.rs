@@ -76,15 +76,11 @@ fn start_listener(listener: TcpListener) {
             "Sending result of {} {} {} = {} to client",
             first_num, calculation[1], second_num, result
         );
-        stream
-            .try_clone()
-            .unwrap()
-            .write(&result.to_be_bytes())
-            .unwrap();
+        stream.write(&result.to_be_bytes()).unwrap();
         stream.flush().unwrap();
 
         stream
             .shutdown(Shutdown::Both)
-            .expect("Could not shutdown stream");
+            .expect("Could not shutdown stream")
     }
 }

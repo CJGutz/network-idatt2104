@@ -68,7 +68,7 @@ fn get_user_calculation() -> String {
         println!("Second number: ");
         let second_number = get_valid_input(None).expect("Recieved no input for second number");
 
-        if first_number.parse::<u32>().is_ok() && second_number.parse::<u32>().is_ok() {
+        if first_number.parse::<i32>().is_ok() && second_number.parse::<i32>().is_ok() {
             calculation = format!("{} {} {}", first_number, operator, second_number);
         }
     }
