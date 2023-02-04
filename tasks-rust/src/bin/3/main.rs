@@ -4,6 +4,7 @@ use std::io::stdin;
 
 mod client;
 mod server;
+mod workers;
 
 pub const ADDRESS: &str = "127.0.0.1:8080";
 pub const READ_TIMEOUT_S: u64 = 1;

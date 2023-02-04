@@ -37,11 +37,16 @@ fn send_to_server(message: String) {
 }
 
 fn get_from_server(stream: &mut TcpStream) -> String {
-    let mut read_buffer = [32; 4];
+    let mut read_buffer = [32; 999];
     stream
         .read(&mut read_buffer)
         .expect("Could not read from stream");
-    return i32::from_be_bytes(read_buffer).to_string();
+    return read_buffer
+        .iter()
+        .map(|&x| x as char)
+        .collect::<String>()
+        .trim()
+        .to_string();
 }
 
 fn get_user_calculation() -> String {
@@ -70,6 +75,8 @@ fn get_user_calculation() -> String {
 
         if first_number.parse::<i32>().is_ok() && second_number.parse::<i32>().is_ok() {
             calculation = format!("{} {} {}", first_number, operator, second_number);
+        } else {
+            println!("Invalid input, please try again");
         }
     }
 
