@@ -2,6 +2,7 @@ use std::{
     collections::VecDeque,
     sync::{Arc, Condvar, Mutex},
     thread,
+    time::Duration,
 };
 pub struct Workers<F>
 where
@@ -28,6 +29,11 @@ where
         let mut task_present = lock.lock().expect("Could not lock condvar mutex");
         *task_present = true;
         condvar.notify_one();
+    }
+
+    pub fn post_timeout(&mut self, func: F, timeout: u64) {
+        thread::sleep(Duration::from_millis(timeout));
+        self.post(func);
     }
 
     // Create a new workers instance

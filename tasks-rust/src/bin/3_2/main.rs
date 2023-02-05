@@ -4,9 +4,7 @@ use std::{
     ops::Add,
 };
 
-use crate::workers::Workers;
-
-mod workers;
+use tasks_rust::workers::Workers;
 
 const ADDRESS: &str = "127.0.0.1:8080";
 const NUMBER_OF_THREADS: u32 = 4;

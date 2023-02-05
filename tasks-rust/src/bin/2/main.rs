@@ -1,6 +1,11 @@
-use workers::Workers;
+use std::thread;
 
-mod workers;
+use tasks_rust::workers::Workers;
+
+fn print_hello() {
+    println!("Hello from thread {:?}", thread::current().id());
+}
+
 
 fn main() {
     let mut workers = Workers::new(4);
@@ -8,19 +13,15 @@ fn main() {
     workers.start();
     event_loop.start();
 
-    workers.post(|| {
-        println!("Hello 1");
-    });
+    workers.post(print_hello);
 
-    workers.post_timeout(|| println!("Hello 2"), 10);
+    workers.post_timeout(print_hello, 10);
 
     event_loop.post(|| {
         println!("Hello from event loop");
     });
 
-    workers.post(|| {
-        println!("Hello 3");
-    });
+    workers.post(print_hello);
 
     workers.join();
 }

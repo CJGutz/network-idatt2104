@@ -4,7 +4,8 @@ use std::{
     time::Duration,
 };
 
-use crate::{workers::Workers, ADDRESS, READ_TIMEOUT_S};
+use crate::{ADDRESS, READ_TIMEOUT_S};
+use tasks_rust::workers::Workers;
 
 const NUMBER_OF_THREADS: u32 = 4;
 
