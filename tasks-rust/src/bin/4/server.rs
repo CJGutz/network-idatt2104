@@ -1,4 +1,4 @@
-use std::{net::UdpSocket};
+use std::net::UdpSocket;
 
 use crate::{CLIENT_ADDRESS, SERVER_ADDRESS};
 
@@ -6,11 +6,18 @@ pub fn create_server() {
     println!("Server listening on {}", SERVER_ADDRESS);
 
     let socket = UdpSocket::bind(SERVER_ADDRESS).expect("Could not bind to address");
-    let mut buf = [32; 100];
-    socket.recv(&mut buf).expect("Could not read from stream");
-    println!("Response: {:?}", buf);
-    let result = calculate_from_stream(&socket);
-    println!("Result: {}", result);
+
+    loop {
+        let error = calculate_from_stream(&socket);
+        println!(
+            "Errors: {}",
+            if error.len() == 0 {
+                "No errors"
+            } else {
+                &error
+            }
+        );
+    }
 }
 
 fn calculate_from_stream(stream: &UdpSocket) -> String {
