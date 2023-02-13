@@ -74,11 +74,10 @@ fn parse_url(url: &str) -> Result<String, String> {
         Some(size) => size,
         None => return Err("Request did not contain the code attribute".to_string()),
     } + 6;
-    let code = url[start..].to_string();
+    let code = url[start..].to_string().replace("+", " ");
     let decoded = decode(code.as_str())
         .expect("Code could not be decoded")
-        .into_owned()
-        .replace("+", " ");
+        .into_owned();
     Ok(decoded)
 }
 
