@@ -40,14 +40,13 @@ fn main() {
 }
 
 fn handle_tcp_stream(stream: &mut TcpStream) {
-    let buf = &mut [0; 200];
+    let buf = &mut [32; 5000];
     match stream.read(buf) {
         Ok(_) => (),
         Err(_) => println!("Connection lost"),
     };
     let request_string = buf.iter().map(|&x| x as char).collect::<String>();
-
-    let code = parse_url(&request_string);
+    let code = parse_url(&request_string.trim());
 
     let result = match code {
         Ok(code) => run_code(code.as_str()),
@@ -71,14 +70,11 @@ fn handle_tcp_stream(stream: &mut TcpStream) {
 }
 
 fn parse_url(url: &str) -> Result<String, String> {
-    let start = match url.find("code=") {
+    let start = match url.find("\ncode=") {
         Some(size) => size,
         None => return Err("Request did not contain the code attribute".to_string()),
-    } + 5;
-    let end = url
-        .find(" HTTP/")
-        .unwrap_or(url.find("\n").unwrap_or(url.len()));
-    let code = url[start..end].to_string();
+    } + 6;
+    let code = url[start..].to_string();
     let decoded = decode(code.as_str())
         .expect("Code could not be decoded")
         .into_owned()
