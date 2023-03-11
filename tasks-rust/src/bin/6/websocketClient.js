@@ -10,13 +10,22 @@ const httpServer = net.createServer((connection) => {
   </head>
   <body>
     WebSocket test page
-    <script>
+    <input type="text" id="message" />
+    <div id="wsMessages"></div>
+    <script charset="utf-8">
       let ws = new WebSocket('ws://localhost:8000');
-      ws.onmessage = event => alert('Message from server: ' + event.data);
-      ws.onopen = () => {
-        alert('Connected to server');
-        ws.send('hello')
+      ws.onmessage = event => {
+        console.log("event data", event.data)
+        document.getElementById('wsMessages').innerHTML += event.data + '<br />';
       };
+      ws.onopen = () => {
+        console.log('Connected to server');
+      };
+      document.getElementById('message').addEventListener('keyup', (event) => {
+        if (event.key === "Enter") {
+          ws.send(event.target.value);
+        }
+      });
     </script>
   </body>
 </html>
